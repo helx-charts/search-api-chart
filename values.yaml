@@ -1,0 +1,33 @@
+web:
+  api_workers: 4
+  api_timeout: 10
+  log_level: DEBUG
+  image:
+    repository: helxplatform/dug
+    tag: "2.0.1"
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  app_name: web
+  service:
+    name: api-web
+    type: ClusterIP
+    annotations: {}
+  api_port: 5551
+  debug: false
+  extraEnv: []
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+nboost:
+  host: api-nboost
+elasticsearch:
+  host: elastic
+  port: "9200"
+  user: elastic
+redis:
+  host: redis
+  port: "6379"

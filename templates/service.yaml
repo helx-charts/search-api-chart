@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  {{- if .Values.web.service.annotations }}
+  annotations: {{ toYaml .Values.web.service.annotations }}
+  {{- end }}
+  labels:
+    app: {{ .Values.web.app_name }}
+  name: {{ .Values.web.service.name }}
+spec:
+  ports:
+    - name: api-port
+      protocol: TCP
+      port: {{ .Values.web.api_port }}
+      targetPort: {{ .Values.web.api_port }}
+  selector:
+    app: {{ .Values.web.app_name }}
+  type: {{ .Values.web.service.type }}

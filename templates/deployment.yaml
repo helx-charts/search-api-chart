@@ -24,13 +24,11 @@ spec:
         name: {{ include "api.web.fullname" . }}-container
         name: "api-web-container"
         env:
-          {{- if .Values.elasticsearch.enabled }}
           - name: ELASTIC_API_HOST
             value: {{ include "api.elasticsearch.fullname" . }}
+          {{- if .Values.web.deployment.extraEnv }}
+          {{- toYaml .Values.web.deployment.extraEnv | nindent 10 }}
           {{- end }}
-        {{- if true }}
-        {{- toYaml .Values.web.deployment.extraEnv | nindent 10 }}
-        {{- end }}
         ports:
           - containerPort: {{ .Values.web.deployment.apiPort }}
         command: [

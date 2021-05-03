@@ -2,66 +2,51 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: {{ .Values.web.app_name}}
+    app: {{ .Values.web.appName}}
   name: {{ include "api.web.fullname" . }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.web.app_name}}
+      app: {{ .Values.web.appName}}
   template:
     metadata:
       labels:
-        app: {{ .Values.web.app_name}}
+        app: {{ .Values.web.appName}}
     spec:
-      {{- with .Values.web.imagePullSecrets }}
+      {{- with .Values.web.deployment.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - image: {{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}
-        imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+      - image: {{ .Values.web.deployment.image.repository }}:{{ .Values.web.deployment.image.tag }}
+        imagePullPolicy: {{ .Values.web.deployment.image.pullPolicy }}
         name: {{ include "api.web.fullname" . }}-container
+        name: "api-web-container"
         env:
-        - name: ELASTIC_API_HOST
-          value: {{ .Values.elasticsearch.host }}
-        - name: ELASTIC_API_PORT
-          value: {{ .Values.elasticsearch.port | quote }}
-        - name: ELASTIC_USER
-          value: {{ .Values.elasticsearch.user }}
-        - name: ELASTIC_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.elasticsearch.existingSecret }}
-              key: password
-        - name: REDIS_HOST
-          value: {{ .Values.redis.host }}
-        - name: REDIS_PORT
-          value: {{ .Values.redis.port | quote }}
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.redis.existingSecret }}
-              key: password
-        - name: NBOOST_API_HOST
-          value: {{ .Values.nboost.host }}
-        {{- if .Values.web.extraEnv }}
-        {{ toYaml .Values.web.extraEnv }}
+          {{- if .Values.elasticsearch.enabled }}
+          - name: ELASTIC_API_HOST
+            value: {{ include "api.elasticsearch.fullname" . }}
+          {{- end }}
+        {{- if true }}
+        {{- toYaml .Values.web.deployment.extraEnv | nindent 10 }}
         {{- end }}
         ports:
-          - containerPort: {{ .Values.web.api_port }}
+          - containerPort: {{ .Values.web.deployment.apiPort }}
         command: [
                    "python",
                    "-m",
                    "dug.api",
+                   {{- if .Values.web.debug }}
                    "--debug",
+                   {{- end }}
 {{/*            "gunicorn",*/}}
-{{/*            "--workers={{ .Values.web.api_workers | default 4 }}",*/}}
+{{/*            "--workers={{ .Values.web.deployment.apiWorkers | default 4 }}",*/}}
 {{/*            "--name=helx-search",*/}}
-{{/*            "--bind=0.0.0.0:{{ .Values.web.api_port }}",*/}}
-{{/*            "--timeout={{ .Values.web.api_timeout }}",*/}}
-{{/*            "--log-level={{ .Values.web.log_level | default "INFO"}}",*/}}
+{{/*            "--bind=0.0.0.0:{{ .Values.web.deployment.apiPort }}",*/}}
+{{/*            "--timeout={{ .Values.web.deployment.apiTimeout }}",*/}}
+{{/*            "--log-level={{ .Values.web.deployment.logLevel | default "INFO"}}",*/}}
 {{/*            "--enable-stdio-inheritance", "--reload", "api.api:app"*/}}
         ]
         resources:
-          {{- toYaml .Values.web.resources | nindent 10 }}
+          {{- toYaml .Values.web.deployment.resources | nindent 10 }}

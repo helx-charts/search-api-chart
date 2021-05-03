@@ -5,14 +5,16 @@ metadata:
   annotations: {{ toYaml .Values.web.service.annotations }}
   {{- end }}
   labels:
-    app: {{ .Values.web.app_name }}
+    app: {{ .Values.web.appName }}
+    {{- include "api.labels" . | nindent 4 }}
   name: {{ .Values.web.service.name }}
+  name: {{ include "api.web.fullname" . }}
 spec:
   ports:
     - name: api-port
       protocol: TCP
-      port: {{ .Values.web.api_port }}
-      targetPort: {{ .Values.web.api_port }}
+      port: {{ .Values.web.service.apiPort }}
+      targetPort: {{ .Values.web.deployment.apiPort }}
   selector:
-    app: {{ .Values.web.app_name }}
+    app: {{ .Values.web.appName }}
   type: {{ .Values.web.service.type }}

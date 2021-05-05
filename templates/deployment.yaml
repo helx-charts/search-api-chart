@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: {{ include "search-api.web.fullname" . }}
   labels:
     app: {{ .Values.web.appName}}
-  name: {{ include "api.web.fullname" . }}
 spec:
   replicas: 1
   selector:
@@ -21,11 +21,9 @@ spec:
       containers:
       - image: {{ .Values.web.deployment.image.repository }}:{{ .Values.web.deployment.image.tag }}
         imagePullPolicy: {{ .Values.web.deployment.image.pullPolicy }}
-        name: {{ include "api.web.fullname" . }}-container
-        name: "api-web-container"
+        name: {{ include "search-api.web.fullname" . }}-container
+        name: "search-api-web-container"
         env:
-          - name: ELASTIC_API_HOST
-            value: {{ include "api.elasticsearch.fullname" . }}
           {{- if .Values.web.deployment.extraEnv }}
           {{- toYaml .Values.web.deployment.extraEnv | nindent 10 }}
           {{- end }}

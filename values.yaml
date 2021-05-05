@@ -1,5 +1,5 @@
 web:
-  appName: api-server
+  appName: webserver
   deployment:
     apiPort: 5551
     apiWorkers: 4
@@ -13,7 +13,7 @@ web:
     imagePullSecrets: []
     resources: {}
   service:
-    name: api-server
+    name: search-api
     type: ClusterIP
     annotations: {}
     apiPort: "5551"

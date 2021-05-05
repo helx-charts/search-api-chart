@@ -1,4 +1,8 @@
 # IntelliJ
 .idea
 
+# Development files
 env/
+
+# External charts
+charts/**/*.tgz

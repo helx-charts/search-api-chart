@@ -22,27 +22,33 @@ spec:
       - image: {{ .Values.web.deployment.image.repository }}:{{ .Values.web.deployment.image.tag }}
         imagePullPolicy: {{ .Values.web.deployment.image.pullPolicy }}
         name: {{ include "search-api.web.fullname" . }}-container
-        name: "search-api-web-container"
         env:
+        {{- if .Values.elasticsearch.enabled }}
+          - name: ELASTIC_API_HOST
+            value: {{ include "search-api.elasticsearch.uname" . }}
+          {{- end }}
+          {{- if .Values.redis.enabled }}
+          - name: REDIS_HOST
+            value: {{ include "search-api.redis.fullname" . }}-master
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "search-api.redis.secretName" . }}
+                key: {{ include "search-api.redis.secretPasswordKey" .}}
+          {{ end }}
           {{- if .Values.web.deployment.extraEnv }}
           {{- toYaml .Values.web.deployment.extraEnv | nindent 10 }}
           {{- end }}
         ports:
           - containerPort: {{ .Values.web.deployment.apiPort }}
         command: [
-                   "python",
-                   "-m",
-                   "dug.api",
-                   {{- if .Values.web.debug }}
-                   "--debug",
-                   {{- end }}
-{{/*            "gunicorn",*/}}
-{{/*            "--workers={{ .Values.web.deployment.apiWorkers | default 4 }}",*/}}
-{{/*            "--name=helx-search",*/}}
-{{/*            "--bind=0.0.0.0:{{ .Values.web.deployment.apiPort }}",*/}}
-{{/*            "--timeout={{ .Values.web.deployment.apiTimeout }}",*/}}
-{{/*            "--log-level={{ .Values.web.deployment.logLevel | default "INFO"}}",*/}}
-{{/*            "--enable-stdio-inheritance", "--reload", "api.api:app"*/}}
+            "gunicorn",
+            "--workers={{ .Values.web.deployment.apiWorkers | default 4 }}",
+            "--name=helx-search",
+            "--bind=0.0.0.0:{{ .Values.web.deployment.apiPort }}",
+            "--timeout={{ .Values.web.deployment.apiTimeout }}",
+            "--log-level={{ .Values.web.deployment.logLevel | default "INFO"}}",
+            "--enable-stdio-inheritance", "--reload", "dug.api:app"
         ]
         resources:
           {{- toYaml .Values.web.deployment.resources | nindent 10 }}

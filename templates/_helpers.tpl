@@ -31,6 +31,18 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Define image version to use
+*/}}
+{{- define "search-api.image" -}}
+{{- $name := .Values.web.deployment.image.repository -}}
+{{ $version := .Values.web.deployment.image.tag}}
+{{- if empty $version }}
+{{- $version = .Chart.AppVersion }}
+{{- end }}
+{{- printf "%s:%s" $name $version }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "search-api.labels" -}}

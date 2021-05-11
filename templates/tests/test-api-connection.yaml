@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-api-test"
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: {{ .Release.Name }}-credentials-test
+      image: {{ template "search-api.image" . }}
+      imagePullPolicy: {{ .Values.web.deployment.image.pullPolicy | quote }}
+      env:
+        {{- if .Values.elasticsearch.enabled }}
+        - name: ELASTIC_API_HOST
+          value: {{ include "search-api.elasticsearch.uname" . }}
+        {{- end }}
+        {{- if .Values.redis.enabled }}
+        - name: REDIS_HOST
+          value: {{ include "search-api.redis.fullname" . }}-master
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "search-api.redis.secretName" . }}
+              key: {{ include "search-api.redis.secretPasswordKey" .}}
+        {{ end }}
+        {{- if .Values.web.deployment.extraEnv }}
+        {{- toYaml .Values.web.deployment.extraEnv | nindent 10 }}
+        {{- end }}
+      command: ["dug", "crawl"]
+      args: ["-p", "topmedtag", "tests/integration/data/test_variables_v1.0.csv"]
+  restartPolicy: Never

@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - image: {{ .Values.web.deployment.image.repository }}:{{ .Values.web.deployment.image.tag }}
+      - image: {{ template "search-api.image" . }}
         imagePullPolicy: {{ .Values.web.deployment.image.pullPolicy }}
         name: {{ include "search-api.web.fullname" . }}-container
         env:

@@ -1,3 +1,8 @@
+image:
+  repository: helxplatform/dug
+  tag: "2.1.0"
+  pullPolicy: IfNotPresent
+
 web:
   appName: webserver
   deployment:
@@ -6,10 +11,6 @@ web:
     apiTimeout: 10
     extraEnv: []
     logLevel: INFO
-    image:
-      repository: helxplatform/dug
-      tag: ""
-      pullPolicy: IfNotPresent
     imagePullSecrets: []
     resources: {}
   service:

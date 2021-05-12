@@ -31,16 +31,34 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Define image version to use
+Environment vars for API pods
 */}}
-{{- define "search-api.image" -}}
-{{- $name := .Values.web.deployment.image.repository -}}
-{{ $version := .Values.web.deployment.image.tag}}
-{{- if empty $version }}
-{{- $version = .Chart.AppVersion }}
+{{- define "search-api.web.deploymentEnv" -}}
+{{- if .Values.elasticsearch.enabled -}}
+- name: ELASTIC_API_HOST
+  value: {{ include "search-api.elasticsearch.uname" . }}
 {{- end }}
-{{- printf "%s:%s" $name $version }}
-{{- end }}
+{{- if .Values.redis.enabled }}
+- name: REDIS_HOST
+  value: {{ include "search-api.redis.fullname" . }}-master
+- name: REDIS_PORT
+  value: {{ .Values.redis.redisPort | quote }}
+{{- if .Values.redis.usePassword }}
+- name: REDIS_PASSWORD
+  {{- if .Values.redis.password }}
+  value: {{ .Values.redis.password }}
+  {{- else }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "search-api.redis.secretName" . }}
+      key: {{ include "search-api.redis.secretPasswordKey" . }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.web.deployment.extraEnv }}
+  {{- toYaml .Values.web.deployment.extraEnv | nindent 10 }}
+  {{- end }}
+{{- end -}}
 
 {{/*
 Common labels

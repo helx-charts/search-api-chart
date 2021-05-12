@@ -19,26 +19,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-      - image: {{ template "search-api.image" . }}
-        imagePullPolicy: {{ .Values.web.deployment.image.pullPolicy }}
+      - image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: {{ include "search-api.web.fullname" . }}-container
-        env:
-        {{- if .Values.elasticsearch.enabled }}
-          - name: ELASTIC_API_HOST
-            value: {{ include "search-api.elasticsearch.uname" . }}
-          {{- end }}
-          {{- if .Values.redis.enabled }}
-          - name: REDIS_HOST
-            value: {{ include "search-api.redis.fullname" . }}-master
-          - name: REDIS_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "search-api.redis.secretName" . }}
-                key: {{ include "search-api.redis.secretPasswordKey" .}}
-          {{ end }}
-          {{- if .Values.web.deployment.extraEnv }}
-          {{- toYaml .Values.web.deployment.extraEnv | nindent 10 }}
-          {{- end }}
+        env: {{ include "search-api.web.deploymentEnv" . | nindent 10 }}
         ports:
           - containerPort: {{ .Values.web.deployment.apiPort }}
         command: [

@@ -1,6 +1,6 @@
 image:
   repository: helxplatform/dug
-  tag: "2.1.0"
+  tag: "2.2.0"
   pullPolicy: IfNotPresent
 
 web:

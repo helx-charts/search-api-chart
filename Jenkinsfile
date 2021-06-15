@@ -7,29 +7,16 @@ pipeline {
         }
     }
     stages {
-        stage('Install') {
-            steps {
-                sh '''
-                echo "Install"
-                '''
-            }
-        }
-        stage('Test') {
-            steps {
-                sh '''
-                echo "Test"
-                '''
-            }
-        }
         stage('Publish') {
             when {
                 buildingTag()
             }
-//             environment {
-//             }
             steps {
                 sh '''
-                echo "Publish"
+                cd lib
+                git clone git@github.com:helx-charts/charts.git && cd charts
+                git checkout feature/build-script
+                ./bin/publish.sh search-api $TAG_NAME
                 '''
             }
         }
